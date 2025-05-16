@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Skor</title>
+</head>
+<body>
+  <h2>Kontrol Skor</h2>
+  <div>
+    <p>TIM A: <span id="scoreA">0</span></p>
+    <button onclick="change('A', 1)">+1</button>
+    <button onclick="change('A', -1)">-1</button>
+  </div>
+  <div>
+    <p>TIM B: <span id="scoreB">0</span></p>
+    <button onclick="change('B', 1)">+1</button>
+    <button onclick="change('B', -1)">-1</button>
+  </div>
+  <div>
+    <button onclick="resetScores()">Reset Skor</button>
+  </div>
+
+  <h2>Ganti Nama Tim</h2>
+  <div>
+    <input type="text" id="teamANameInput" placeholder="Nama TIM A" />
+    <button onclick="updateNameA()">Update Nama TIM A</button>
+  </div>
+  <div>
+    <input type="text" id="teamBNameInput" placeholder="Nama TIM B" />
+    <button onclick="updateNameB()">Update Nama TIM B</button>
+  </div>
+
+  <h3>Nama Tim Aktif</h3>
+  <p>TIM A: <span id="currentTeamAName">TIM A</span></p>
+  <p>TIM B: <span id="currentTeamBName">TIM B</span></p>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let scoreA = 0;
+    let scoreB = 0;
+
+    socket.on('scoreUpdate', ({ teamA, teamB }) => {
+      scoreA = teamA;
+      scoreB = teamB;
+      document.getElementById('scoreA').textContent = scoreA;
+      document.getElementById('scoreB').textContent = scoreB;
+    });
+
+    socket.on('teamNameUpdate', ({ teamA, teamB }) => {
+      document.getElementById('currentTeamAName').textContent = teamA;
+      document.getElementById('currentTeamBName').textContent = teamB;
+    });
+
+    function change(team, delta) {
+      if (team === 'A') scoreA += delta;
+      if (team === 'B') scoreB += delta;
+      socket.emit('updateScore', { teamA: scoreA, teamB: scoreB });
+    }
+
+    function resetScores() {
+      scoreA = 0;
+      scoreB = 0;
+      socket.emit('updateScore', { teamA: scoreA, teamB: scoreB });
+    }
+
+    function updateNameA() {
+      const newName = document.getElementById('teamANameInput').value || 'TIM A';
+      const currentB = document.getElementById('currentTeamBName').textContent || 'TIM B';
+      socket.emit('updateTeamNames', { teamA: newName, teamB: currentB });
+    }
+
+    function updateNameB() {
+      const newName = document.getElementById('teamBNameInput').value || 'TIM B';
+      const currentA = document.getElementById('currentTeamAName').textContent || 'TIM A';
+      socket.emit('updateTeamNames', { teamA: currentA, teamB: newName });
+    }
+  </script>
+</body>
+</html>

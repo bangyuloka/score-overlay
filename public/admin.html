@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Skor</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background: #121212;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      min-height: 100dvh;
+    }
+
+    h2, h3 {
+      color: #00ffff;
+      margin-bottom: 0.5rem;
+    }
+
+    .section {
+      background: #1e1e1e;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .team-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: #00ffff;
+      color: #000;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #00dddd;
+    }
+
+    input[type="text"] {
+      padding: 0.5rem;
+      border-radius: 0.3rem;
+      border: none;
+      width: 100%;
+    }
+
+    .team-display {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    @media (min-width: 600px) {
+      .team-controls {
+        flex-direction: row;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="section">
+    <h2>Kontrol Skor</h2>
+    <div class="team-controls">
+      <p>TIM A: <span id="scoreA">0</span></p>
+      <button onclick="change('A', 1)">+1</button>
+      <button onclick="change('A', -1)">-1</button>
+    </div>
+    <div class="team-controls">
+      <p>TIM B: <span id="scoreB">0</span></p>
+      <button onclick="change('B', 1)">+1</button>
+      <button onclick="change('B', -1)">-1</button>
+    </div>
+    <div>
+      <button onclick="resetScores()">Reset Skor</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Ganti Nama Tim</h2>
+    <div class="team-controls">
+      <input type="text" id="teamANameInput" placeholder="Nama TIM A" />
+      <button onclick="updateNameA()">Update Nama TIM A</button>
+    </div>
+    <div class="team-controls">
+      <input type="text" id="teamBNameInput" placeholder="Nama TIM B" />
+      <button onclick="updateNameB()">Update Nama TIM B</button>
+    </div>
+  </div>
+
+  <div class="section team-display">
+    <h3>Nama Tim Aktif</h3>
+    <p>TIM A: <span id="currentTeamAName">TIM A</span></p>
+    <p>TIM B: <span id="currentTeamBName">TIM B</span></p>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let scoreA = 0;
+    let scoreB = 0;
+
+    socket.on('scoreUpdate', ({ teamA, teamB }) => {
+      scoreA = teamA;
+      scoreB = teamB;
+      document.getElementById('scoreA').textContent = scoreA;
+      document.getElementById('scoreB').textContent = scoreB;
+    });
+
+    socket.on('teamNameUpdate', ({ teamA, teamB }) => {
+      document.getElementById('currentTeamAName').textContent = teamA;
+      document.getElementById('currentTeamBName').textContent = teamB;
+    });
+
+    function change(team, delta) {
+      if (team === 'A') scoreA += delta;
+      if (team === 'B') scoreB += delta;
+      socket.emit('updateScore', { teamA: scoreA, teamB: scoreB });
+    }
+
+    function resetScores() {
+      scoreA = 0;
+      scoreB = 0;
+      socket.emit('updateScore', { teamA: scoreA, teamB: scoreB });
+    }
+
+    function updateNameA() {
+      const newName = document.getElementById('teamANameInput').value || 'TIM A';
+      const currentB = document.getElementById('currentTeamBName').textContent || 'TIM B';
+      socket.emit('updateTeamNames', { teamA: newName, teamB: currentB });
+    }
+
+    function updateNameB() {
+      const newName = document.getElementById('teamBNameInput').value || 'TIM B';
+      const currentA = document.getElementById('currentTeamAName').textContent || 'TIM A';
+      socket.emit('updateTeamNames', { teamA: currentA, teamB: newName });
+    }
+  </script>
+</body>
+</html>

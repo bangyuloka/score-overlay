@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Overlay Skor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <button class="fullscreen-btn" onclick="toggleFullScreen()">⛶ Fullscreen</button>
+  <div class="scoreboard">
+    <div class="team">
+      <h1>TIM A</h1>
+      <div class="score" id="scoreA">0</div>
+    </div>
+    <div class="team">
+      <h1>TIM B</h1>
+      <div class="score" id="scoreB">0</div>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    socket.on('scoreUpdate', ({ teamA, teamB }) => {
+      animateScore('scoreA', teamA);
+      animateScore('scoreB', teamB);
+    });
+
+    socket.on('teamNameUpdate', ({ teamA, teamB }) => {
+      document.querySelectorAll('.team')[0].querySelector('h1').textContent = teamA;
+      document.querySelectorAll('.team')[1].querySelector('h1').textContent = teamB;
+    });
+
+    function animateScore(id, value) {
+      const el = document.getElementById(id);
+      if (el.textContent != value) {
+        el.textContent = value;
+        el.classList.add('animate');
+        setTimeout(() => el.classList.remove('animate'), 300);
+      }
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        if (window.innerWidth < 768) toggleFullScreen();
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

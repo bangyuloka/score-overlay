@@ -1,0 +1,78 @@
+/* style.css */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: transparent;
+  color: #fff;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100dvh;
+  padding: 1rem;
+}
+
+.scoreboard {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  max-width: 1000px;
+  height: 25dvh;
+  gap: 1rem;
+}
+
+.team {
+  flex: 1;
+  text-align: center;
+}
+
+.team h1 {
+  font-size: clamp(2rem, 5vw, 4rem);
+  margin-bottom: 0.5rem;
+  color: #00ffff;
+  transition: transform 0.2s ease;
+}
+
+.team:nth-child(2) h1 {
+  color: #ff00ff;
+}
+
+.score {
+  font-size: clamp(2.5rem, 8vw, 6rem);
+  font-weight: bold;
+  background: yellow;
+  color: black;
+  padding: 0.5rem 1rem;
+  min-width: 120px;
+  max-width: 180px;
+  margin: 0 auto;
+  border-radius: 1rem;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.score.animate {
+  transform: scale(1.2);
+  background: orange;
+}
+
+@media (max-width: 600px) {
+  .scoreboard {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .score {
+    font-size: clamp(3rem, 10vw, 8rem);
+  }
+}
